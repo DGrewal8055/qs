@@ -5,6 +5,7 @@ import json
 import chalk
 import flag
 import strings
+import time
 import v.vmod
 // import benchmark
 
@@ -19,13 +20,8 @@ mut:
 
 fn main() {
 	// mut b := benchmark.start()
-	dirs := os.ls(os.join_path(os.home_dir(), 'scoop', 'buckets'))!
 
-	mut bucket_dirs := []string{}
-	for dir in dirs {
-		bucket_dirs << os.home_dir() + '\\scoop\\buckets\\' + dir + '\\bucket'
-	}
-
+	// Parsing Flags ---------------------------------------------------
 	vm := vmod.decode(@VMOD_FILE)!
 	mut fp := flag.new_flag_parser(os.args)
     fp.application('qs')
@@ -33,7 +29,8 @@ fn main() {
     fp.limit_free_args(0, 1)!
     fp.description('Faster search for scoop packages.')
     fp.skip_executable()
-    update_flag := fp.bool_opt('update', `u`, 'Update scoop database first before searching.') or {false}
+    update_database_flag := fp.bool_opt('update', `u`, 'Update scoop database first before searching.') or {false}
+    update_cache_flag := fp.bool_opt('cache', `c`, 'Manually update the cache file') or {false}
     query := fp.finalize() or {
         eprintln(err)
         println(fp.usage())
@@ -44,53 +41,59 @@ fn main() {
         println(fp.usage())
         return
 	}
-	if update_flag == true {
+
+	// Updating Sccop Database ------------------------------------------
+	
+	if update_database_flag == true {
 		println("\nUpdating ....\n")
 		result := os.execute_or_exit("scoop update")
 		println(result.output)
 	}
-	println("Packages ....\n")
 
-	// b.measure('Flag Parsing ...')
+	// Updating Cache ---------------------------------------------------
+	cache_dir := os.join_path(os.home_dir(), '.config', 'cache.json')
 
-	// v_files := os.walk_ext(dir, 'json')
-	mut json_files := []string{}
+	last_mod := time.unix(os.stat(cache_dir)!.mtime).utc_to_local()
+	cache_update := if last_mod < time.now().add_days(-1) { true } else { false }
 
-	for dir in bucket_dirs {
-		for file in os.ls(dir)! {
-			json_files << dir + "\\" + file
-		}
+	if update_cache_flag || cache_update {
+		println("\nUpdateing Cache file ....")
+		create_cache(cache_dir)!
 	}
 
-	// b.measure('Walk Function')
+	// b.measure('Parsing flags and checking if cache is out of date. ...')
 
+	// Searching the Packages --------------------------------------------
+
+	json_file := os.read_file(cache_dir)!
+	packages := search(query[0], json_file)!
+
+	// b.measure('Search')
+
+	// Printing the Info -------------------------------------------------
+	print_info(packages)
+
+
+	// b.measure('Printing')
+
+}
+
+// Searxh for given query in the cached json database
+fn search(query string, cache string) ![]Package {
+
+	decoded := json.decode([]Package, cache)!
 	mut packages := []Package{}
 
-	mut name := ''
-	mut bucket := ''
-
-	for entry in json_files {
-
-		arr := entry.rsplit_nth('\\', 4)
-		bucket = arr[2]
-		name = arr[0].split('.')[0]
-
-		if name.to_lower().contains(query[0]) {
-
-			file := os.read_file(entry)!
-			package_json := json.decode(Package , file)!
-
-			packages << Package{
-				name: name
-				bucket : bucket
-				version: package_json.version
-				homepage: package_json.homepage
-				description: package_json.description
-			}
+	for pac in decoded {
+		if pac.name.contains(query) {
+			packages << pac
 		}
 	}
-	// b.measure('For Loop')
+	return packages
+}
 
+// Print package info in terminal
+fn print_info(packages []Package) {
 	mut	pac_info := strings.new_builder(100)
 
 	for pac in packages {
@@ -102,10 +105,6 @@ fn main() {
 	}
 	
 	print(pac_info)
-	unsafe {
-		pac_info.free()
-	}
 
-	// b.measure('Printing')
-
+	unsafe { pac_info.free() }
 }
