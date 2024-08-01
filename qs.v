@@ -2,13 +2,12 @@ module main
 
 import os
 import json
-// import chalk
 import termcolor as tc
 import flag
 import strings
 import time
 import v.vmod
-import benchmark
+// import benchmark
 
 struct Package {
 mut:
@@ -20,7 +19,7 @@ mut:
 }
 
 fn main() {
-	mut b := benchmark.start()
+	// mut b := benchmark.start()
 
 	// Parsing Flags ---------------------------------------------------
 	vm := vmod.decode(@VMOD_FILE)!
@@ -62,19 +61,19 @@ fn main() {
 		create_cache(cache_dir)!
 	}
 
-	b.measure('Parsing flags and checking if cache is out of date. ...')
+	// b.measure('Parsing flags and checking if cache is out of date. ...')
 
 	// Searching the Packages --------------------------------------------
 
 	json_file := os.read_file(cache_dir)!
 	packages := search(query[0], json_file)!
 
-	b.measure('Search')
+	// b.measure('Search')
 
 	// Printing the Info -------------------------------------------------
 	print_info(packages)
 
-	b.measure('Printing')
+	// b.measure('Printing')
 
 }
 

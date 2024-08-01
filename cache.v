@@ -2,12 +2,12 @@ module main
 
 import os
 import json
-import benchmark
+// import benchmark
 
 
 // create cached json database
 fn create_cache(cache_dir string)! {
-	mut b := benchmark.start()
+	// mut b := benchmark.start()
 	dirs := os.ls(os.join_path(os.home_dir(), 'scoop', 'buckets'))!
 
 	mut bucket_dirs := []string{}
@@ -15,7 +15,7 @@ fn create_cache(cache_dir string)! {
 		bucket_dirs << os.home_dir() + '\\scoop\\buckets\\' + dir + '\\bucket'
 	}
 
-	b.measure('Loading Directories ...')
+	// b.measure('Loading Directories ...')
 
 	mut json_files := []string{}
 
@@ -25,7 +25,7 @@ fn create_cache(cache_dir string)! {
 		}
 	}
 
-	b.measure('Walk Function')
+	// b.measure('Walk Function')
 
 	mut packages := []Package{}
 
@@ -51,7 +51,7 @@ fn create_cache(cache_dir string)! {
 
 	}
 
-	b.measure('Json Decode')
+	// b.measure('Json Decode')
 
 	json_encoded := json.encode(packages)
 	mut cache := os.create(cache_dir) or {
@@ -62,5 +62,5 @@ fn create_cache(cache_dir string)! {
 	cache.write_string(json_encoded)!
 	cache.close()
 
-	b.measure('Json Encode')
+	// b.measure('Json Encode')
 }
