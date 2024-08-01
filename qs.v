@@ -12,7 +12,7 @@ import v.vmod
 struct Package {
 mut:
 	name        string
-	bucket 		string
+	bucket      string
 	version     string
 	description string
 	homepage    string
@@ -24,29 +24,31 @@ fn main() {
 	// Parsing Flags ---------------------------------------------------
 	vm := vmod.decode(@VMOD_FILE)!
 	mut fp := flag.new_flag_parser(os.args)
-    fp.application('qs')
-    fp.version(vm.version)
-    fp.limit_free_args(0, 1)!
-    fp.description('Faster search for scoop packages.')
-    fp.skip_executable()
-    update_database_flag := fp.bool_opt('update', `u`, 'Update scoop database first before searching.') or {false}
-    update_cache_flag := fp.bool_opt('cache', `c`, 'Manually update the cache file') or {false}
-    query := fp.finalize() or {
-        eprintln(err)
-        println(fp.usage())
-        return
-    }
-	
+	fp.application('qs')
+	fp.version(vm.version)
+	fp.limit_free_args(0, 1)!
+	fp.description('Faster search for scoop packages.')
+	fp.skip_executable()
+	update_database_flag := fp.bool_opt('update', `u`, 'Update scoop database first before searching.') or {
+		false
+	}
+	update_cache_flag := fp.bool_opt('cache', `c`, 'Manually update the cache file') or { false }
+	query := fp.finalize() or {
+		eprintln(err)
+		println(fp.usage())
+		return
+	}
+
 	if query.len == 0 {
-        println(fp.usage())
-        return
+		println(fp.usage())
+		return
 	}
 
 	// Updating Sccop Database ------------------------------------------
-	
+
 	if update_database_flag == true {
-		println("\nUpdating ....\n")
-		result := os.execute_or_exit("scoop update")
+		println('\nUpdating ....\n')
+		result := os.execute_or_exit('scoop update')
 		println(result.output)
 	}
 
@@ -57,7 +59,7 @@ fn main() {
 	cache_update := if last_mod < time.now().add_days(-1) { true } else { false }
 
 	if update_cache_flag || cache_update {
-		println("\nUpdateing Cache file ....")
+		println('\nUpdateing Cache file ....')
 		create_cache(cache_dir)!
 	}
 
@@ -74,12 +76,10 @@ fn main() {
 	print_info(packages)
 
 	// b.measure('Printing')
-
 }
 
 // Searxh for given query in the cached json database
 fn search(query string, cache string) ![]Package {
-
 	decoded := json.decode([]Package, cache)!
 	mut packages := []Package{}
 
@@ -93,16 +93,16 @@ fn search(query string, cache string) ![]Package {
 
 // Print package info in terminal
 fn print_info(packages []Package) {
-	mut	pac_info := strings.new_builder(100)
+	mut pac_info := strings.new_builder(100)
 
 	for pac in packages {
-		bucket_name := tc.colorize(text : pac.bucket, fc : .blue) 
-		pac_name := tc.colorize(text : pac.name, fc : .green)
-		pac_url := tc.colorize(text : pac.homepage, fc : .red, style : .dim)
+		bucket_name := tc.colorize(text: pac.bucket, fc: .blue)
+		pac_name := tc.colorize(text: pac.name, fc: .green)
+		pac_url := tc.colorize(text: pac.homepage, fc: .red, style: .dim)
 
-		pac_info.write_string("${pac_name} (${pac.version})\n\tBucket : ${bucket_name}\n\tHomepage : ${pac_url}\n\tDescription : ${pac.description}\n\n" )
+		pac_info.write_string('${pac_name} (${pac.version})\n\tBucket : ${bucket_name}\n\tHomepage : ${pac_url}\n\tDescription : ${pac.description}\n\n')
 	}
-	
+
 	print(pac_info)
 
 	unsafe { pac_info.free() }
