@@ -2,12 +2,13 @@ module main
 
 import os
 import json
-import chalk
+// import chalk
+import termcolor as tc
 import flag
 import strings
 import time
 import v.vmod
-// import benchmark
+import benchmark
 
 struct Package {
 mut:
@@ -19,7 +20,7 @@ mut:
 }
 
 fn main() {
-	// mut b := benchmark.start()
+	mut b := benchmark.start()
 
 	// Parsing Flags ---------------------------------------------------
 	vm := vmod.decode(@VMOD_FILE)!
@@ -61,20 +62,19 @@ fn main() {
 		create_cache(cache_dir)!
 	}
 
-	// b.measure('Parsing flags and checking if cache is out of date. ...')
+	b.measure('Parsing flags and checking if cache is out of date. ...')
 
 	// Searching the Packages --------------------------------------------
 
 	json_file := os.read_file(cache_dir)!
 	packages := search(query[0], json_file)!
 
-	// b.measure('Search')
+	b.measure('Search')
 
 	// Printing the Info -------------------------------------------------
 	print_info(packages)
 
-
-	// b.measure('Printing')
+	b.measure('Printing')
 
 }
 
@@ -85,7 +85,7 @@ fn search(query string, cache string) ![]Package {
 	mut packages := []Package{}
 
 	for pac in decoded {
-		if pac.name.contains(query) {
+		if pac.name.to_lower().contains(query) {
 			packages << pac
 		}
 	}
@@ -97,9 +97,9 @@ fn print_info(packages []Package) {
 	mut	pac_info := strings.new_builder(100)
 
 	for pac in packages {
-		bucket_name := chalk.fg(pac.bucket, 'blue') 
-		pac_name := chalk.fg(pac.name, 'green')
-		pac_url := chalk.fg(chalk.style(pac.homepage, 'dim'), 'light_red')
+		bucket_name := tc.colorize(text : pac.bucket, fc : .blue) 
+		pac_name := tc.colorize(text : pac.name, fc : .green)
+		pac_url := tc.colorize(text : pac.homepage, fc : .red, style : .dim)
 
 		pac_info.write_string("${pac_name} (${pac.version})\n\tBucket : ${bucket_name}\n\tHomepage : ${pac_url}\n\tDescription : ${pac.description}\n\n" )
 	}
