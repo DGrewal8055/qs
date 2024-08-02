@@ -1,7 +1,5 @@
 module termcolor
 
-import math.bits
-
 pub enum FG {
 	black         = 30
 	red
@@ -56,6 +54,18 @@ pub enum Style {
 	normal
 }
 
+fn (s Style) to_styles () string {
+	mut a := u16(s)
+	mut c := ''
+	for i := 1; i <= 10 ; i++ {
+		if a % 2 == 1 {
+			c = c + ';' + i.str()
+		}
+		a = a >> 1 
+	}
+	return c
+}
+
 const fg_rgb = 38
 const bg_rgb = 48
 
@@ -92,14 +102,8 @@ pub:
 }
 
 pub fn colorize(text Text) string {
-	mut styles := ''
-	for i in [Style.bold, .dim, .italic, .underline, .blink, .rapid, .reverse, .hidden, .crossed,
-		.normal] {
-		if text.style.has(i) {
-			styles = styles + ';' + (bits.trailing_zeros_16(u16(i)) + 1).str()
-		}
-	}
-
+	mut styles := text.style.to_styles()
+	
 	frgb := text.fhex.u8_array()
 	brgb := text.bhex.u8_array()
 
