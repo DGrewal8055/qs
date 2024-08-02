@@ -69,7 +69,7 @@ fn (s Style) to_styles () string {
 const fg_rgb = 38
 const bg_rgb = 48
 
-const prefix = '\e['
+const prefix = '\033['
 const suffix = 'm'
 const reset = '${prefix}0${suffix}'
 
