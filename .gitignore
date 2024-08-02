@@ -1,6 +1,6 @@
 # Binaries for programs and plugins
 main
-quick_scoop_search
+qs
 *.exe
 *.exe~
 *.so
