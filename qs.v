@@ -56,7 +56,7 @@ fn main() {
 	cache_dir := os.join_path(os.home_dir(), '.config', 'cache.json')
 
 	last_mod := time.unix(os.stat(cache_dir)!.mtime).utc_to_local()
-	cache_update := if last_mod < time.now().add_days(-1) { true } else { false }
+		cache_update := if last_mod < time.now().add_days(-3) { true } else { false }
 
 	if update_cache_flag || cache_update {
 		println('\nUpdateing Cache file ....')
