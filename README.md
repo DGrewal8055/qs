@@ -17,18 +17,10 @@ Add `qs.exe` to `PATH`.
 qs <package name>
 ```
 Example:
-```
+```sh
 > qs gimp
-gimp (2.10.38)
-        Bucket : extras
-        Homepage : https://www.gimp.org
-        Description : GNU Image Manipulation Program
-
-gimp-dev (2.99.18)
-        Bucket : versions
-        Homepage : https://www.gimp.org
-        Description : GNU Image Manipulation Program
 ```
+![screenshot](imgs/qs.png "Screenshot")
 ```
 qs -u blender
 ```
