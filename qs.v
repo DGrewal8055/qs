@@ -7,7 +7,7 @@ import flag
 import strings
 import time
 import v.vmod
-// import benchmark
+import benchmark
 
 struct Package {
 mut:
@@ -19,7 +19,7 @@ mut:
 }
 
 fn main() {
-	// mut b := benchmark.start()
+	mut b := benchmark.start()
 
 	// Parsing Flags ---------------------------------------------------
 	vm := vmod.decode(@VMOD_FILE)!
@@ -74,8 +74,9 @@ fn main() {
 
 	// Printing the Info -------------------------------------------------
 	print_info(packages)
-
 	// b.measure('Printing')
+
+	println("Time Spent : ${b.total_duration()}ms")
 }
 
 // Searxh for given query in the cached json database
@@ -91,7 +92,7 @@ fn search(query string, cache string) ![]Package {
 	return packages
 }
 
-// Print package info in terminal
+// Print package info to terminal
 fn print_info(packages []Package) {
 	mut pac_info := strings.new_builder(100)
 
