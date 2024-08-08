@@ -54,14 +54,14 @@ pub enum Style {
 	normal
 }
 
-fn (s Style) to_styles () string {
+fn (s Style) to_styles() string {
 	mut a := u16(s)
 	mut c := ''
-	for i := 1; i <= 10 ; i++ {
+	for i := 1; i <= 10; i++ {
 		if a % 2 == 1 {
 			c = c + ';' + i.str()
 		}
-		a = a >> 1 
+		a = a >> 1
 	}
 	return c
 }
@@ -103,7 +103,7 @@ pub:
 
 pub fn colorize(text Text) string {
 	mut styles := text.style.to_styles()
-	
+
 	frgb := text.fhex.u8_array()
 	brgb := text.bhex.u8_array()
 

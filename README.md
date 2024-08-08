@@ -28,11 +28,11 @@ Passing `-u` will update the Sccop first then search for Package.
 ```
 qs -c krita
 ```
-You can manually update the cache file by passing `-c` flag however cache file is updated autometically if it older than a day.
+You can manually update the cache file by passing `-c` flag however cache file is updated autometically if it older than 3 day.
 
 Help:
 ```
-qs 0.0.1
+qs 0.0.3
 -----------------------------------------------
 Usage: qs [options] [ARGS]
 

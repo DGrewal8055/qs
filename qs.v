@@ -2,12 +2,12 @@ module main
 
 import os
 import json
-import termcolor as tc
 import flag
 import strings
 import time
 import v.vmod
 import benchmark
+import termcolor as tc
 
 struct Package {
 mut:
@@ -56,7 +56,7 @@ fn main() {
 	cache_dir := os.join_path(os.home_dir(), '.config', 'cache.json')
 
 	last_mod := time.unix(os.stat(cache_dir)!.mtime).utc_to_local()
-		cache_update := if last_mod < time.now().add_days(-3) { true } else { false }
+	cache_update := if last_mod < time.now().add_days(-3) { true } else { false }
 
 	if update_cache_flag || cache_update {
 		println('\nUpdateing Cache file ....')
@@ -76,7 +76,7 @@ fn main() {
 	print_info(packages)
 	// b.measure('Printing')
 
-	println("Time Spent : ${b.total_duration()}ms")
+	println('Time Spent : ${b.total_duration()}ms')
 }
 
 // Searxh for given query in the cached json database
