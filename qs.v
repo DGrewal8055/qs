@@ -4,7 +4,6 @@ import os
 import json
 import flag
 import strings
-import time
 import v.vmod
 import benchmark
 import termcolor as tc
@@ -32,7 +31,7 @@ fn main() {
 	update_database_flag := fp.bool_opt('update', `u`, 'Update scoop database first before searching.') or {
 		false
 	}
-	update_cache_flag := fp.bool_opt('cache', `c`, 'Manually update the cache file') or { false }
+
 	query := fp.finalize() or {
 		eprintln(err)
 		println(fp.usage())
@@ -52,41 +51,38 @@ fn main() {
 		println(result.output)
 	}
 
-	// Updating Cache ---------------------------------------------------
-	cache_dir := os.join_path(os.home_dir(), '.config', 'cache.json')
-
-	last_mod := time.unix(os.stat(cache_dir)!.mtime).utc_to_local()
-	cache_update := if last_mod < time.now().add_days(-3) { true } else { false }
-
-	if update_cache_flag || cache_update {
-		println('\nUpdateing Cache file ....')
-		create_cache(cache_dir)!
-	}
-
-	// b.measure('Parsing flags and checking if cache is out of date. ...')
+	// Getting All Packages ---------------------------------------------------
+	
+	packages_files := create_package_array()!
+	// b.measure('Getting all Package files. ...')
 
 	// Searching the Packages --------------------------------------------
 
-	json_file := os.read_file(cache_dir)!
-	packages := search(query[0], json_file)!
-
-	// b.measure('Search')
+	result_packages := search(query[0], packages_files)!
+	// b.measure('Searching')
 
 	// Printing the Info -------------------------------------------------
-	print_info(packages)
+
+	print_info(result_packages)
 	// b.measure('Printing')
 
 	println('Time Spent : ${b.total_duration()}ms')
 }
 
-// Searxh for given query in the cached json database
-fn search(query string, cache string) ![]Package {
-	decoded := json.decode([]Package, cache)!
-	mut packages := []Package{}
+// Search for given query in the all packages 
+fn search(query string, files []string) ![]Package {
+	 mut packages := []Package{}
+	 mut package := Package{}
 
-	for pac in decoded {
-		if pac.name.to_lower().contains(query) {
-			packages << pac
+	for pac_file in files {
+		if pac_file.to_lower().contains(query) {
+			json_file := os.read_file(pac_file)!
+
+			package = json.decode(Package, json_file)!
+			package.name = os.file_name(pac_file).before(".")
+			package.bucket = os.dir(pac_file).after("buckets\\").before("\\bucket")
+
+			packages << package
 		}
 	}
 	return packages
@@ -101,10 +97,32 @@ fn print_info(packages []Package) {
 		pac_name := tc.colorize(text: pac.name, fc: .green)
 		pac_url := tc.colorize(text: pac.homepage, fc: .red, style: .dim)
 
-		pac_info.write_string('${pac_name} (${pac.version})\n\tBucket : ${bucket_name}\n\tHomepage : ${pac_url}\n\tDescription : ${pac.description}\n\n')
+		pac_info.write_string(' ${pac_name} (${pac.version})\n\t Bucket: ${bucket_name}\n\t Url: ${pac_url}\n\t Description: ${pac.description}\n\n')
 	}
 
 	print(pac_info)
 
 	unsafe { pac_info.free() }
+}
+
+fn create_package_array() ![]string {
+	// mut b := benchmark.start()
+	dirs := os.ls(os.join_path(os.home_dir(), 'scoop', 'buckets'))!
+
+	mut bucket_dirs := []string{}
+	for dir in dirs {
+		bucket_dirs << os.home_dir() + '\\scoop\\buckets\\' + dir + '\\bucket'
+	}
+
+	// b.measure('Loading Directories ...')
+	mut json_files := []string{}
+
+	for dir in bucket_dirs {
+		for file in os.ls(dir)! {
+			json_files << dir + '\\' + file
+		}
+	}
+
+	return json_files
+
 }

@@ -13,7 +13,7 @@ v -prod -skip-unused -o qs .
 Add `qs.exe` to `PATH`.
 
 ## Usage
-```
+```sh
 qs <package name>
 ```
 Example:
@@ -21,18 +21,14 @@ Example:
 > qs gimp
 ```
 ![screenshot](imgs/qs.png "Screenshot")
-```
+```sh
 qs -u blender
 ```
 Passing `-u` will update the Sccop first then search for Package.
-```
-qs -c krita
-```
-You can manually update the cache file by passing `-c` flag however cache file is updated autometically if it older than 3 day.
 
 Help:
 ```
-qs 0.0.3
+qs 0.0.4
 -----------------------------------------------
 Usage: qs [options] [ARGS]
 
@@ -42,7 +38,6 @@ The arguments should be at most 1 in number.
 
 Options:
   -u, --update              Update scoop database first before searching.
-  -c, --cache               Manually update the cache file
   -h, --help                display this help and exit
   --version                 output version information and exit
 ```
